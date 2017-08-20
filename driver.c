@@ -21,12 +21,12 @@ int main(int argc, char**argv)
 	FILE *fp; 
 
 	if (argc < 2)
-		yyin = stdin;
+		yyin = stdin;  // Si no hay argumentos en la linea de comandos, lea de stdin
 	else
 	{
 		fp = fopen(argv[1],"r");
 		if (!fp)
-			error("File not found");
+			error("File not found");  // Chequeo basico de error
 		else
 			yyin = fp;
 	}
@@ -39,22 +39,24 @@ int consume(int token_leido,int token_esperado)
 	if (token_leido == token_esperado)
 	{
 		lookahead = yylex();
-		printf("Nuevo lookahead = %d\n",lookahead);
+		printf("Nuevo lookahead = %d\n",lookahead);  // debug message
 	}
 	else error("Error de sintaxis, token leido no es lo esperado");
 }
 
+// La produccion es expr->term expr'
 void expr()
 {
-	puts("TERM");
+	puts("TERM");  // debug message
 	term();
-	puts("EXPR_PRIMA");
+	puts("EXPR_PRIMA");  // debug message
 	expr_prima();
 }
 
+// La produccion es expr'->+ term expr' | - term expr' | empty
 void expr_prima()
 {
-	if (lookahead == '+')
+	if (lookahead == '+')             // Ilustrativo: estoy usando el valor entero del caracter + (ASCII 43) en vez de un valor simbolico
 	{
 		puts("+");
 		consume(lookahead,'+');
@@ -63,7 +65,7 @@ void expr_prima()
 		puts("EXPR_PRIMA");
 		expr_prima();
 	}
-	else if (lookahead == '-')
+	else if (lookahead == '-')      // Ilustrativo: estoy usando el valor ASCII del '-'.  Esto viene del lexer
 	{
 		consume(lookahead,'-');
 		term();
@@ -84,18 +86,20 @@ void term_prima()
 	if (lookahead == MULT_OP)
 	{
 		puts("*");
-		consume(lookahead,MULT_OP);
+		consume(lookahead,MULT_OP);   // Aqui estoy usando un valor simbolico de token asignado por mi.  A futuro, lo asigna Bison
 		puts("FACTOR");
 		factor();
 		puts("TERM_PRIMA");
 		term_prima();
-	}
+	} 
 	else if (lookahead == DIV_OP)
 	{
 		consume(lookahead,DIV_OP);
 		factor();
 		term_prima();
 	}
+	
+	// Si no fue MULT_OP ni DIV_OP entonces se toma la cuerda nula
 }
 
 void factor()
